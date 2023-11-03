@@ -1,0 +1,20 @@
+clientName: clientname
+clientEnvironment: environment # dev, test, stage, prod
+labels:
+  environment: environment # dev, test, stage, prod
+  purpose: purpose # webserver, gitlab, netbox, etc.
+  release: some_lease
+
+network:
+  - name: "k8snet"
+    vlan: 90
+    cidr: "192.168.0.0/20"
+    gateway: "192.168.0.1"
+  - name: "vmnet"
+    vlan: 100
+    cidr: "192.168.16.0/20"
+    gateway: "192.168.16.1"
+  - name: "lbnet"
+    vlan: 110
+    cidr: "192.168.32.0/20"
+    gateway: "192.168.32.1"

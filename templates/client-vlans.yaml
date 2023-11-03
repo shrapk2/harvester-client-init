@@ -1,0 +1,41 @@
+---
+apiVersion: tf.upbound.io/v1beta1
+kind: Workspace
+metadata:
+  name: "{{ .Values.clientName }}-{{ .Values.clientEnvironment }}-networks"
+  namespace: crossplane-system
+  labels:
+        {{- range $key, $value := .Values.labels }}
+        {{ $key }}: "{{ $value }}"
+        {{- end }}
+spec:
+  providerConfigRef:
+    name: terraform-harvester
+  forProvider:
+    source: Inline
+    module: |
+      data "harvester_clusternetwork" "vmnet" {
+        name = "vmnet"
+      }
+
+      {{- range .Values.network }}
+      output "{{ $.Values.clientName }}-{{ $.Values.clientEnvironment }}-{{ .name }}" {
+        value       = harvester_network.{{ .name }}
+      }
+
+      resource "harvester_network" "{{ .name }}" {
+        name      = "{{ .vlan }}-{{ .name }}"
+        namespace = "{{ $.Values.clientName }}-{{ $.Values.clientEnvironment }}"
+
+        vlan_id = {{ .vlan }}
+
+        route_mode    = "manual"
+        route_cidr    = "{{ .cidr }}"
+        route_gateway = "{{ .gateway }}"
+
+        cluster_network_name = data.harvester_clusternetwork.vmnet.name
+      }
+      {{- end }}
+  writeConnectionSecretToRef:
+    namespace: crossplane-system
+    name: {{ .Values.clientName }}-{{ .Values.clientEnvironment }}-network-outputs

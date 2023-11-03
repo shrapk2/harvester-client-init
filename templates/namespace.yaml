@@ -1,0 +1,19 @@
+---
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: {{ .Values.clientName }}-{{ .Values.clientEnvironment }}
+  namespace: crossplane-system
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: {{ .Values.clientName }}-{{ .Values.clientEnvironment }}
+        labels:
+          {{- range $key, $value := .Values.labels }}
+          {{ $key }}: "{{ $value }}"
+          {{- end }}
+  providerConfigRef:
+    name: kubernetes-harvester
